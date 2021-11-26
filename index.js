@@ -6,7 +6,11 @@ const myModule = function () {
   const customFieldIndex = packageXML.search('CustomField');
   if (customFieldIndex !== -1) {
     const indexOfClosingTypes = packageXML.indexOf('</types>', customFieldIndex);
-    const indexOfTypes = packageXML.LastIndexOf('<types>', customFieldIndex);
+    const filepreceedingindex = packageXML.substr('<types>', customFieldIndex); // package.xml before this index
+    const findtypes = filepreceedingindex.split('<types>').pop(); // package.xml after <types> to customFieldIndex
+    const indexofmember = findtypes.replace(/ *\<[\S]*?\>/g, ""); // Dispalys only fields
+    const str = indexofmember.trim().split('\r\n');
+    return console.log(str);
   }
   return console.log('Custom Fields are not part of the package.xml');
 };
