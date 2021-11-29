@@ -1,39 +1,39 @@
 const fs = require('fs');
 const colors = require('colors');
 const xml2js = require('xml2js');
-const util = require('util');
 
-const packageXMLPath = 'package/mdapi/package.xml';
-const AdminProfilePath = 'force-app/main/default/profiles/Admin.profile-meta.xml';
+const PACKAGEXMLPATH = 'package/mdapi/package.xml';
+const ADMINPROFILEPATH = 'force-app/main/default/profiles/Admin.profile-meta.xml';
 let customFieldsArray = [];
 
-
 /**
- * This method finds the customField in package.xml, puts them in an array and returns the array
+ * This method parses the package.xml as Javascript Object,
+ * finds the customFields in it, puts them in an array and returns the array
  * @param {String} packageXML - The content of package.xml
- * @param {Integer} customFieldIndex - The index in the package.xml where CustomField tag is present
  * @returns The array of CustomFields in the package.xml
  */
-const returnCustomFieldsArray = (packageXML) => xml2js.parseString(packageXML, (err, result) => {
-  customFieldsArray = result.Package.types.filter((element) => element.name[0] === 'CustomField')[0].members;
-  return customFieldsArray;
-});
+const returnCustomFieldsArray = (packageXML) => xml2js
+  .parseString(packageXML, (err, packageXMLObj) => {
+    customFieldsArray = packageXMLObj.Package.types.filter((element) => element.name[0] === 'CustomField')[0].members;
+    return customFieldsArray;
+  });
 
+/**
+ * This method verifies if the customFields have permissions in the Admin profile
+ * @returns
+ */
 const verifyPermissionsInAdminProfile = () => {
   const fieldsWithoutReadAccess = [];
-  customFieldsArray.forEach((customField) => {
-    const AdminProfile = fs.readFileSync(AdminProfilePath).toString();
-    const fieldIndex = AdminProfile.search(customField);
-    if (fieldIndex !== -1) {
-      const readableindex = AdminProfile.indexOf('</readable>', fieldIndex);
-      const fileprecedingindex = AdminProfile.substr('<readable>', readableindex);
-      const findtypes = fileprecedingindex.split('<readable>').pop();
-      if (findtypes.match(true)) {
-        return findtypes.match(true);
+  const adminProfile = fs.readFileSync(ADMINPROFILEPATH).toString();
+  xml2js.parseString(adminProfile, (err, adminProfileObj) => {
+    customFieldsArray.forEach((customField) => {
+      const fieldPermissionBlock = adminProfileObj
+        .Profile.fieldPermissions.find((obj) => obj.field[0] === customField);
+      if (!fieldPermissionBlock || !fieldPermissionBlock.readable[0]) {
+        fieldsWithoutReadAccess.push(customField);
       }
-      return fieldsWithoutReadAccess.push(customField);
-    }
-    return fieldsWithoutReadAccess.push(customField);
+      return fieldsWithoutReadAccess;
+    });
   });
   if (fieldsWithoutReadAccess.length > 0) {
     console.error(colors.red('The following fields do not have read permissions on the Admin profile. Update Admin profile to give them access.'));
@@ -45,7 +45,7 @@ const verifyPermissionsInAdminProfile = () => {
 
 const verifyCustomFieldPermissions = () => {
   try {
-    const packageXML = fs.readFileSync(packageXMLPath).toString();
+    const packageXML = fs.readFileSync(PACKAGEXMLPATH).toString();
     const customFieldIndex = packageXML.search('CustomField');
     // If Custom fields are present in the package.xml
     if (customFieldIndex !== -1) {
