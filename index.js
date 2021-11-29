@@ -29,7 +29,7 @@ const verifyPermissionsInAdminProfile = () => {
     customFieldsArray.forEach((customField) => {
       const fieldPermissionBlock = adminProfileObj
         .Profile.fieldPermissions.find((obj) => obj.field[0] === customField);
-      if (!fieldPermissionBlock || !fieldPermissionBlock.readable[0]) {
+      if (!fieldPermissionBlock || !fieldPermissionBlock.readable || fieldPermissionBlock.readable[0] === 'false') {
         fieldsWithoutReadAccess.push(customField);
       }
       return fieldsWithoutReadAccess;
