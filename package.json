@@ -15,5 +15,14 @@
   "bugs": {
     "url": "https://github.com/abhisheksaxena7/search-field-permissions/issues"
   },
-  "homepage": "https://github.com/abhisheksaxena7/search-field-permissions#readme"
+  "homepage": "https://github.com/abhisheksaxena7/search-field-permissions#readme",
+  "dependencies": {
+    "colors": "^1.4.0",
+    "xml2js": "^0.4.23"
+  },
+  "devDependencies": {
+    "eslint": "^8.3.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.3"
+  }
 }

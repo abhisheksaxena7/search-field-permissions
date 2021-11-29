@@ -21,6 +21,7 @@
     </types>
     <types>
         <members>Case.ID</members>
+        <members>Case.ANI__c</members>
         <members>Account.Name</members>
         <name>CustomField</name>
     </types>
